@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "1.1.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/app.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "env":{
+                "DB_USER": "larpUser",
+                "DB_PASSWORD": "Butttown42069",
+                "DB_NAME": "mern",
+                "GOOGLE_API_KEY":  "AIzaSyDspkliXhiCPSCbRY7noNsBpo7dkfAL3Cs"
+        
+            }
+        }
+    ]
+}

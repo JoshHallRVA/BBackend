@@ -13,7 +13,7 @@ const getPlaceById = async (req, res, next) => {
 
   let place;
   try {
-    place = await Place.findById(placeId);
+    place = await Place.findById(placeId).populate({ path: 'larpers', model: User });
   } catch (err) {
     const error = new HttpError(
       'Something went wrong, could not find a place.',
@@ -39,12 +39,13 @@ const getPlacesByUserId = async (req, res, next) => {
   // let places;
   let userWithPlaces;
   try {
-    userWithPlaces = await User.findById(userId).populate('places');
+    userWithPlaces = await User.findById(userId).populate({ path: 'places', model: Place, populate: { path: 'larpers', model: User } });
   } catch (err) {
     const error = new HttpError(
       'Fetching places failed, please try again later.',
       500
     );
+    console.log(err);
     return next(error);
   }
 
@@ -167,6 +168,51 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
+const joinBattle = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(
+      new HttpError('Invalid inputs passed, please check your data.', 422)
+    );
+  }
+
+  const placeId = req.params.pid;
+
+  let place;
+  try {
+    place = await Place.findById(placeId)//.populate({ path: 'larpers', model: User });
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not update place.',
+      500
+    );
+    return next(error);
+  }
+
+  if (place.creator.toString() === req.userData.userId) {
+    const error = new HttpError('You are already the owner of this place.', 401);
+    return next(error);
+  }
+
+  if (place.larpers.indexOf(req.userData.userId) !== -1) {
+    const error = new HttpError('You have already joined this battle.', 500);
+    return next(error);
+  }
+
+  try {
+    place.larpers.push(req.userData.userId);
+    await place.save();
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, you could not join battle.',
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ place: place.toObject({ getters: true }) });
+};
+
 const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
 
@@ -222,4 +268,5 @@ exports.getPlaceById = getPlaceById;
 exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
 exports.updatePlace = updatePlace;
+exports.joinBattle = joinBattle;
 exports.deletePlace = deletePlace;

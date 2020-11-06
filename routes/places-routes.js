@@ -29,6 +29,12 @@ router.post(
 );
 
 router.patch(
+  '/join/:pid',
+  [],
+  placesControllers.joinBattle
+);
+
+router.patch(
   '/:pid',
   [
     check('title')
